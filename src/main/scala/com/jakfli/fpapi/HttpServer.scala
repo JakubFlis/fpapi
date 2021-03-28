@@ -1,9 +1,10 @@
 package com.jakfli.fpapi
 
-import cats.implicits.catsSyntaxOptionId
-import cats.syntax.semigroupk._
 import com.jakfli.fpapi.api.{NotificationApi, OrderApi}
 import com.jakfli.fpapi.services.NotificationService.NotificationServiceM
+
+import cats.implicits.catsSyntaxOptionId
+import cats.syntax.semigroupk._
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.server.{Router, Server}
 import org.http4s.syntax.kleisli._

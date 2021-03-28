@@ -5,13 +5,13 @@ import zio.logging.Logging
 import zio.stream.ZStream
 import zio.{ExitCode, ZIO, _}
 
-object Main extends App {
+object Main extends zio.App {
   val program: RIO[HttpServer with Logging, ExitCode] =
     for {
       _ <- Logging.info("Starting...")
       _ <- ZStream
         .mergeAllUnbounded()(
-          ZStream.fromEffect(HttpServer.run)
+          ZStream.fromEffect(HttpServer.run.forever)
         )
         .runDrain
         .toManaged_
