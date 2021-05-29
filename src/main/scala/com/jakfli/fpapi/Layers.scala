@@ -28,7 +28,7 @@ object Layers {
   }
 
   val httpServer = {
-    (Clock.live ++ notificationService) >>>
+    (Clock.live ++ notificationService ++ orderService) >>>
       HttpServer.live
   }
 

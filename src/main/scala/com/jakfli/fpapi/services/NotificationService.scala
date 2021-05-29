@@ -47,6 +47,15 @@ object NotificationService {
     override def toString: String =
       "order-delivered-template"
   }
+  object NotificationTemplate {
+    def convertToTemplate(stringTemplate: String): Option[NotificationTemplate] = stringTemplate match {
+      case "order-placed-template"            => Some(OrderPlaced)
+      case "order-ready-to-pick-up-template"  => Some(OrderReadyToPickUp)
+      case "order-cancelled-template"         => Some(OrderCancelled)
+      case "order-delivered-template"         => Some(OrderDelivered)
+      case _                                  => None
+    }
+  }
 
   case class NotificationMessage(value: String) extends AnyVal
 

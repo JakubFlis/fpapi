@@ -1,27 +1,30 @@
 package com.jakfli.fpapi.api
 
-import cats.data.NonEmptyList
+import com.jakfli.fpapi.HttpServer.RouteEnv
 import com.jakfli.fpapi.api.endpoints.NotificationEndpoints
-import com.jakfli.fpapi.api.responses.CreateOrderResponse
-import com.jakfli.fpapi.services.CustomerService.Customer.CustomerId
+import com.jakfli.fpapi.api.requests.SendNotificationRequest
 import com.jakfli.fpapi.services.NotificationService
-import com.jakfli.fpapi.services.NotificationService.NotificationServiceM
-import com.jakfli.fpapi.services.OrderService.Order.{OrderId, OrderItem}
-import com.jakfli.fpapi.services.ProductService.Product.ProductId
-import com.jakfli.fpapi.services.RestaurantService.Restaurant.RestaurantId
+import com.jakfli.fpapi.services.NotificationService.{NotificationMessage, NotificationServiceM, NotificationTemplate}
 import sttp.tapir.server.http4s.ztapir.ZHttp4sServerInterpreter
 import sttp.tapir.ztapir._
 import zio.ZIO
 import zio.interop.catz._
 
-class NotificationApi(val notifEndpoints: NotificationEndpoints) {
-  val placeOrderServerEndpoint: ZServerEndpoint[NotificationServiceM, Unit, String, CreateOrderResponse] =
-    notifEndpoints.notificationEndpoint.zServerLogic(request =>
-      ZIO.succeed(CreateOrderResponse(OrderId(""), CustomerId(""), RestaurantId("res"), NonEmptyList.of(OrderItem(ProductId(""), 1))))
+class NotificationApi(val notificationEndpoints: NotificationEndpoints) {
+  val placeOrderServerEndpoint: ZServerEndpoint[NotificationServiceM, SendNotificationRequest, String, Unit] =
+    notificationEndpoints.sendNotificationEndpoint.zServerLogic(request =>
+      NotificationTemplate.convertToTemplate(request.template.value) match {
+        case Some(template) =>
+          NotificationService
+            .sendNotification(request.emailAddress, template, NotificationMessage(request.message.value))
+            .bimap(_.toString, _.toString)
+        case None =>
+          ZIO.fail(s"There's no template [${request.template.value}] in the system.")
+      }
     )
 
   val endpoints = List(
-    placeOrderServerEndpoint
+    placeOrderServerEndpoint.widen[RouteEnv]
   )
 
   val routes = ZHttp4sServerInterpreter

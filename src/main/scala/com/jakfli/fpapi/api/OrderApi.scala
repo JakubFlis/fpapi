@@ -1,5 +1,6 @@
 package com.jakfli.fpapi.api
 
+import com.jakfli.fpapi.HttpServer.RouteEnv
 import com.jakfli.fpapi.api.endpoints.OrderEndpoints
 import com.jakfli.fpapi.api.requests.CreateOrderRequest
 import com.jakfli.fpapi.api.responses.CreateOrderResponse
@@ -18,7 +19,7 @@ class OrderApi(val orderEndpoints: OrderEndpoints) {
     )
 
   val endpoints = List(
-    placeOrderServerEndpoint
+    placeOrderServerEndpoint.widen[RouteEnv]
   )
 
   val routes = ZHttp4sServerInterpreter

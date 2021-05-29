@@ -1,0 +1,26 @@
+sudo: required
+language: scala
+scala:
+  - 2.13.5
+
+script:
+  - sbt '; build; test'
+
+cache:
+  directories:
+    - $HOME/.ivy2
+    - $HOME/.sbt
+
+dist: trusty
+
+matrix:
+  include:
+    - jdk: openjdk10
+
+env:
+  global:
+    - DEFAULT_TIMEOUT_MILLIS=300
+    - DEFAULT_NO_SIGNALS_TIMEOUT_MILLIS=200
+    - PUBLISHER_REFERENCE_GC_TIMEOUT_MILLIS=300
+addons:
+  ostname: mr-jar

@@ -1,10 +1,10 @@
 package com.jakfli.fpapi
 
-import com.jakfli.fpapi.api.{NotificationApi, OrderApi}
-import com.jakfli.fpapi.services.NotificationService.NotificationServiceM
-
 import cats.implicits.catsSyntaxOptionId
 import cats.syntax.semigroupk._
+import com.jakfli.fpapi.api.{NotificationApi, OrderApi}
+import com.jakfli.fpapi.services.NotificationService.NotificationServiceM
+import com.jakfli.fpapi.services.OrderService.OrderServiceM
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.server.{Router, Server}
 import org.http4s.syntax.kleisli._
@@ -16,7 +16,7 @@ import zio.interop.catz._
 import zio.{Has, RIO, RLayer, Runtime, URIO, ZIO, ZLayer, ZManaged}
 
 object HttpServer {
-  type RouteEnv      = Has[Clock.Service] with NotificationServiceM
+  type RouteEnv      = Has[Clock.Service] with NotificationServiceM with OrderServiceM
   type RequestZIO[A] = RIO[RouteEnv, A]
   type HttpServer    = Has[Server[RequestZIO]]
 
@@ -36,11 +36,11 @@ object HttpServer {
   val notifEndpoints = notifApi.endpoints
 
   val docs           = OpenAPIDocsInterpreter.serverEndpointsToOpenAPI(
-    notifEndpoints,
+    orderEndpoints ++ notifEndpoints,
     openApiInfo
   )(OpenAPIDocsOptions.default)
   val docRoutes      = new SwaggerHttp4s(docs.toYaml).routes[RequestZIO]
-  val routes         = notifRoutes <+> docRoutes
+  val routes         = orderRoutes <+> notifRoutes <+> docRoutes
 
   def createHttp4Server: ZManaged[RouteEnv, Throwable, Server[RequestZIO]] =
     ZManaged.runtime[RouteEnv].flatMap { implicit runtime: Runtime[RouteEnv] =>

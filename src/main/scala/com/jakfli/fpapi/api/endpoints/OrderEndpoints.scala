@@ -10,8 +10,12 @@ import sttp.tapir.json.circe.jsonBody
 import sttp.tapir.ztapir._
 
 class OrderEndpoints extends TapirCodecEnumeratum with SchemaDerivation {
-  val placeOrderEndpoint: ZEndpoint[CreateOrderRequest, String, CreateOrderResponse] =
+  val orderEndpointsBase =
     endpoint
+    .tag("Orders")
+
+  val placeOrderEndpoint: ZEndpoint[CreateOrderRequest, String, CreateOrderResponse] =
+    orderEndpointsBase
       .post
       .in("order")
       .errorOut(stringBody)
