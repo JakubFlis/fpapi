@@ -4,7 +4,7 @@ scala:
   - 2.13.5
 
 script:
-  - sbt '; build; test'
+  - sbt '; compile; test'
 
 cache:
   directories:
